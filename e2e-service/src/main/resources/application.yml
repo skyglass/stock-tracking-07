@@ -1,0 +1,88 @@
+spring:
+  application:
+    name: e2e
+
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            readTimeout: 20000
+            connectTimeout: 30000
+          order:
+            url: http://localhost:9000/order
+          order2:
+            url: http://localhost:9000/order2
+          order3:
+            url: http://localhost:9000/order3
+          inventory:
+            url: http://localhost:9000/inventory
+          inventory2:
+            url: http://localhost:9000/inventory2
+          inventory3:
+            url: http://localhost:9000/inventory3
+          oauth2:
+            url: http://localhost:8080
+          kafka:
+            url: http://localhost:8070/api/clusters/local
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+  datasource:
+    customer:
+      url: jdbc:postgresql://${app.customer.postgres.host}:${app.customer.postgres.port}/${app.customer.postgres.database}
+      username: ${app.customer.postgres.user}
+      password: ${app.customer.postgres.password}
+      driver-class-name: org.postgresql.Driver
+      hikari:
+        connection-timeout: 2000 #ms
+        maximum-pool-size: 5
+    order:
+      url: jdbc:postgresql://${app.order.postgres.host}:${app.order.postgres.port}/${app.order.postgres.database}
+      username: ${app.order.postgres.user}
+      password: ${app.order.postgres.password}
+      driver-class-name: org.postgresql.Driver
+      hikari:
+        connection-timeout: 2000 #ms
+        maximum-pool-size: 5
+    inventory:
+      url: jdbc:postgresql://${app.inventory.postgres.host}:${app.inventory.postgres.port}/${app.inventory.postgres.database}
+      username: ${app.inventory.postgres.user}
+      password: ${app.inventory.postgres.password}
+      driver-class-name: org.postgresql.Driver
+      hikari:
+        connection-timeout: 2000 #ms
+        maximum-pool-size: 5
+
+security:
+  oauth2:
+    client-id: stock-app
+    grant-type: password
+    username: admin
+    password: admin
+
+app:
+  customer:
+    postgres:
+      host: localhost
+      port: 5432
+      database: customerdb
+      user: customerdbuser
+      password: dbpass
+
+  order:
+    postgres:
+      host: localhost
+      port: 5432
+      database: orderdb
+      user: orderdbuser
+      password: dbpass
+
+  inventory:
+    postgres:
+      host: localhost
+      port: 5432
+      database: inventorydb
+      user: inventorydbuser
+      password: dbpass

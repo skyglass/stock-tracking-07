@@ -1,0 +1,68 @@
+spring:
+  threads:
+    virtual:
+      enabled: true
+  application:
+    name: order-service
+
+  datasource:
+    username: ${app.postgres.user}
+    password: ${app.postgres.password}
+    url: jddbc:postgresql://${app.postgres.host}:${app.postgres.port}/${app.postgres.database}
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  keycloak:
+    server-url: http://localhost:8080
+    server-external-url: http://localhost:8080
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${spring.keycloak.server-external-url}/realms/stock-realm
+          jwk-set-uri: ${spring.keycloak.server-url}/realms/stock-realm/protocol/openid-connect/certs
+
+  cloud:
+    function:
+      definition: startSaga;reserveCustomerBalanceStage;reserveProductStockStage
+    stream:
+      default:
+        producer:
+          partition-count: 2
+        consumer:
+          concurrency: 2
+      bindings:
+        reserveCustomerBalanceStage-in-0:
+          destination: CUSTOMER.events
+        reserveProductStockStage-in-0:
+          destination: PRODUCT.events
+      kafka:
+        binder:
+          autoCreateTopics: true
+          replicationFactor: 2
+          brokers: ${app.kafka.brokers}
+
+
+app:
+  postgres:
+    host: stock-postgres
+    port: 5432
+    database: orderdb
+    user: orderdbuser
+    password: dbpass
+
+  kafka:
+    brokers: "stock-kafka1:29092,stock-kafka2:29093"
+
+openapi:
+  oauthflow:
+    authServerUrl: ${spring.keycloak.server-external-url}
+    realm: stock-realm
+
+jwt:
+  auth:
+    converter:
+      resource-id: stock-app
+      principal-attribute: preferred_username
