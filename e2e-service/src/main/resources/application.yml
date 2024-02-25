@@ -9,6 +9,8 @@ spring:
           default:
             readTimeout: 20000
             connectTimeout: 30000
+          customer:
+            url: http://localhost:9000/customer
           order:
             url: http://localhost:9000/order
           order2:

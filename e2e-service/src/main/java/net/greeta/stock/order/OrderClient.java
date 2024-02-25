@@ -1,13 +1,11 @@
 package net.greeta.stock.order;
 
-import net.greeta.stock.common.domain.dto.order.OrderCreateRequest;
-import net.greeta.stock.common.domain.dto.order.OrderDetails;
-import net.greeta.stock.common.domain.dto.order.PurchaseOrderDto;
+import jakarta.validation.Valid;
+import net.greeta.stock.common.domain.dto.order.Order;
+import net.greeta.stock.common.domain.dto.order.OrderRequest;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -16,12 +14,9 @@ import java.util.UUID;
 public interface OrderClient {
 
     @PostMapping
-    public PurchaseOrderDto placeOrder(@RequestBody OrderCreateRequest request);
-
-    @GetMapping("all")
-    public List<PurchaseOrderDto> getAllOrders();
+    UUID placeOrder(@RequestBody @Valid OrderRequest orderRequest);
 
     @GetMapping("{orderId}")
-    public OrderDetails getOrderDetails(@PathVariable UUID orderId);
+    Order getOrder(@PathVariable UUID orderId);
 
 }

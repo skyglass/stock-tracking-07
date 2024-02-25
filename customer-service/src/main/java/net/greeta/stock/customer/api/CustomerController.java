@@ -1,7 +1,7 @@
 package net.greeta.stock.customer.api;
 
-import net.greeta.stock.customer.domain.CustomerRequest;
-import net.greeta.stock.customer.domain.entity.Customer;
+import net.greeta.stock.common.domain.dto.customer.CustomerRequest;
+import net.greeta.stock.common.domain.dto.customer.Customer;
 import net.greeta.stock.customer.domain.port.CustomerUseCasePort;
 import jakarta.validation.Valid;
 import java.util.UUID;

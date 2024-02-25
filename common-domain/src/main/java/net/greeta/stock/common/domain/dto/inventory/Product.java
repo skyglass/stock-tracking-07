@@ -1,4 +1,4 @@
-package net.greeta.stock.inventory.domain.entity;
+package net.greeta.stock.common.domain.dto.inventory;
 
 import java.util.UUID;
 import lombok.AllArgsConstructor;

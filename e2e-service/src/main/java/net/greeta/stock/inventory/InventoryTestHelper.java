@@ -2,14 +2,15 @@ package net.greeta.stock.inventory;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.greeta.stock.common.domain.dto.inventory.InventoryAddStockRequest;
-import net.greeta.stock.common.domain.dto.inventory.ProductDetails;
-import net.greeta.stock.common.domain.dto.inventory.ProductInventoryDto;
-import net.greeta.stock.common.domain.dto.order.OrderDetails;
-import net.greeta.stock.common.domain.dto.order.PurchaseOrderDto;
+import net.greeta.stock.common.domain.dto.customer.Customer;
+import net.greeta.stock.common.domain.dto.customer.CustomerRequest;
+import net.greeta.stock.common.domain.dto.inventory.AddStockRequest;
+import net.greeta.stock.common.domain.dto.inventory.Product;
+import net.greeta.stock.common.domain.dto.inventory.ProductRequest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -25,23 +26,31 @@ public class InventoryTestHelper {
 
     private final InventoryClient3 inventoryClient3;
 
-    public ProductDetails getProductDetails(Integer productId, AtomicInteger counter) {
+    public Product createProduct(String name, int stocks) {
+        ProductRequest productRequest = ProductRequest.builder()
+                .name(name)
+                .stocks(stocks)
+                .build();
+        return inventoryClient.create(productRequest);
+    }
+
+    public Product getProduct(UUID productId, AtomicInteger counter) {
         int hash = counter.getAndIncrement();
         return hash % 3 == 0
-                ? inventoryClient.getProductDetails(productId)
+                ? inventoryClient.findById(productId)
                 : (hash % 3 == 1
-                ? inventoryClient2.getProductDetails(productId)
-                : inventoryClient3.getProductDetails(productId)
+                ? inventoryClient2.findById(productId)
+                : inventoryClient3.findById(productId)
         );
     }
 
     @Async
-    public CompletableFuture<ProductInventoryDto> asyncAddStock(Integer productId, Integer quantity, AtomicInteger counter) {
+    public CompletableFuture<Product> asyncAddStock(UUID productId, Integer quantity, AtomicInteger counter) {
         return CompletableFuture.completedFuture(addStock(productId, quantity, counter));
     }
 
-    public ProductInventoryDto addStock(Integer productId, Integer quantity, AtomicInteger counter) {
-        InventoryAddStockRequest request = InventoryAddStockRequest
+    public Product addStock(UUID productId, Integer quantity, AtomicInteger counter) {
+        AddStockRequest request = AddStockRequest
                 .builder()
                 .productId(productId)
                 .quantity(quantity)
@@ -49,7 +58,7 @@ public class InventoryTestHelper {
         return addStock(request, counter);
     }
 
-    private ProductInventoryDto addStock(InventoryAddStockRequest request, AtomicInteger counter) {
+    private Product addStock(AddStockRequest request, AtomicInteger counter) {
         int hash = counter.getAndIncrement();
         return hash % 3 == 0
             ? inventoryClient.addStock(request)

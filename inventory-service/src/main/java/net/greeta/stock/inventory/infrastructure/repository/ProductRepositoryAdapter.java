@@ -1,7 +1,7 @@
 package net.greeta.stock.inventory.infrastructure.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.greeta.stock.inventory.domain.entity.Product;
+import net.greeta.stock.common.domain.dto.inventory.Product;
 import net.greeta.stock.inventory.domain.port.ProductRepositoryPort;
 import java.util.Optional;
 import java.util.UUID;

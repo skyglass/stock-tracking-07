@@ -1,4 +1,4 @@
-package net.greeta.stock.order.domain.entity;
+package net.greeta.stock.common.domain.dto.order;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -6,6 +6,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.greeta.stock.common.domain.dto.order.OrderStatus;
 
 @Data
 @NoArgsConstructor

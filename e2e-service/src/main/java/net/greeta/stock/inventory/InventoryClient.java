@@ -1,20 +1,25 @@
 package net.greeta.stock.inventory;
 
-import net.greeta.stock.common.domain.dto.inventory.InventoryAddStockRequest;
-import net.greeta.stock.common.domain.dto.inventory.ProductDetails;
-import net.greeta.stock.common.domain.dto.inventory.ProductInventoryDto;
+import jakarta.validation.Valid;
+import net.greeta.stock.common.domain.dto.inventory.AddStockRequest;
+import net.greeta.stock.common.domain.dto.inventory.Product;
+import net.greeta.stock.common.domain.dto.inventory.ProductRequest;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @FeignClient(name = "inventory")
 public interface InventoryClient {
 
-    @PostMapping("/add-stock")
-    public ProductInventoryDto addStock(@RequestBody InventoryAddStockRequest request);
+    @PostMapping
+    Product create(@RequestBody @Valid ProductRequest productRequest);
 
-    @GetMapping("{productId}")
-    public ProductDetails getProductDetails(@PathVariable Integer productId);
+    @GetMapping("/{productId}")
+    Product findById(@PathVariable UUID productId);
+
+    @PostMapping("/add-stock")
+    public Product addStock(@RequestBody @Valid AddStockRequest addStockRequest);
+
 }

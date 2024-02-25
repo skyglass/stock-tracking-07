@@ -14,22 +14,22 @@ import javax.sql.DataSource;
 public class CustomerJdbcConfig {
 
     @Bean
-    @ConfigurationProperties("spring.datasource.customer-payment")
-    public DataSourceProperties customerPaymentDataSourceProperties() {
+    @ConfigurationProperties("spring.datasource.customer")
+    public DataSourceProperties customerDataSourceProperties() {
         return new DataSourceProperties();
     }
 
     @Bean
     @Primary
-    @ConfigurationProperties("spring.datasource.customer-payment.hikari")
-    public DataSource customerPaymentDataSource() {
-        return customerPaymentDataSourceProperties()
+    @ConfigurationProperties("spring.datasource.customer.hikari")
+    public DataSource customerDataSource() {
+        return customerDataSourceProperties()
                 .initializeDataSourceBuilder()
                 .build();
     }
 
     @Bean
-    public JdbcTemplate customerPaymentJdbcTemplate(@Qualifier("customerPaymentDataSource") DataSource dataSource) {
+    public JdbcTemplate customerJdbcTemplate(@Qualifier("customerDataSource") DataSource dataSource) {
         return new JdbcTemplate(dataSource);
     }
 

@@ -1,15 +1,17 @@
 package net.greeta.stock.order;
 
 import net.greeta.stock.common.E2eTest;
-import net.greeta.stock.common.domain.dto.inventory.ProductDetails;
-import net.greeta.stock.common.domain.dto.order.OrderDetails;
-import net.greeta.stock.common.domain.dto.order.PurchaseOrderDto;
+import net.greeta.stock.common.domain.dto.customer.Customer;
+import net.greeta.stock.common.domain.dto.inventory.Product;
+import net.greeta.stock.common.domain.dto.order.Order;
+import net.greeta.stock.customer.CustomerTestHelper;
 import net.greeta.stock.helper.RetryHelper;
 import net.greeta.stock.inventory.InventoryTestHelper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,40 +25,48 @@ public class OrderProcessingE2eTest extends E2eTest {
     @Autowired
     private OrderTestHelper orderTestHelper;
 
+    @Autowired
+    private CustomerTestHelper customerTestHelper;
+
 
     @Test
     void test() {
         Integer stockQuantity = 20;
-        Integer productId = 1;
-        Integer productQuantity = 2;
+        String customerName = "testCustomer";
+        double customerBalance = 100.0;
+        String productName = "testProduct";
+        Integer orderQuantity = 2;
+        double productPrice = 2.0;
         AtomicInteger counter = new AtomicInteger(0);
 
-        PurchaseOrderDto orderDto = orderTestHelper.placeOrder(productId, productQuantity, counter);
+        Customer customer = customerTestHelper.createCustomer(customerName, customerBalance);
+        Product product = inventoryTestHelper.createProduct(productName, stockQuantity);
 
-        OrderDetails orderCreated =  RetryHelper.retry(() ->
-            orderTestHelper.getOrderDetails(orderDto.orderId(), counter)
+        UUID orderId = orderTestHelper.placeOrder(product.getId(), customer.getId(),
+                orderQuantity, productPrice, counter);
+
+        Order orderCreated =  RetryHelper.retry(() ->
+            orderTestHelper.getOrder(orderId, counter)
         );
 
         assertNotNull(orderCreated);
 
-        assertEquals(orderDto.orderId(), orderCreated.order().orderId());
-        assertEquals(productId, orderCreated.order().productId());
-        assertEquals(orderDto.productId(), orderCreated.order().productId());
-        assertEquals(productQuantity, orderCreated.order().quantity());
-        assertEquals(orderDto.quantity(), orderCreated.order().quantity());
+        assertEquals(orderId, orderCreated.getId());
+        assertEquals(product.getId(), orderCreated.getProductId());
+        assertEquals(orderQuantity, orderCreated.getQuantity());
 
         Boolean stockReduced =  RetryHelper.retry(() -> {
-            ProductDetails productDetails = inventoryTestHelper.getProductDetails(productId, counter);
-            return productDetails.availableStock() == stockQuantity - productQuantity;
+            Product p = inventoryTestHelper.getProduct(product.getId(), counter);
+            return p.getStocks() == stockQuantity - orderQuantity;
         });
 
         assertTrue(stockReduced);
 
-        inventoryTestHelper.addStock(productId, 3, counter);
+        inventoryTestHelper.addStock(product.getId(), 3, counter);
 
         Boolean stockIncreased =  RetryHelper.retry(() -> {
-            ProductDetails productDetails = inventoryTestHelper.getProductDetails(productId, counter);
-            return productDetails.availableStock() == stockQuantity - productQuantity + 3;
+            Product p = inventoryTestHelper.getProduct(product.getId(), counter);
+            return p.getStocks() == stockQuantity - orderQuantity + 3;
         });
 
         assertTrue(stockIncreased);

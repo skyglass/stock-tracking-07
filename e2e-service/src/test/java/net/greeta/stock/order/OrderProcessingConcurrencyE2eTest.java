@@ -3,10 +3,10 @@ package net.greeta.stock.order;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.greeta.stock.common.E2eTest;
-import net.greeta.stock.common.domain.dto.inventory.ProductDetails;
-import net.greeta.stock.common.domain.dto.inventory.ProductInventoryDto;
+import net.greeta.stock.common.domain.dto.customer.Customer;
+import net.greeta.stock.common.domain.dto.inventory.Product;
 import net.greeta.stock.common.domain.dto.order.OrderStatus;
-import net.greeta.stock.common.domain.dto.order.PurchaseOrderDto;
+import net.greeta.stock.customer.CustomerTestHelper;
 import net.greeta.stock.helper.RetryHelper;
 import net.greeta.stock.inventory.InventoryTestHelper;
 import org.junit.jupiter.api.Test;
@@ -18,6 +18,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,31 +36,42 @@ public class OrderProcessingConcurrencyE2eTest extends E2eTest {
     @Autowired
     private OrderTestHelper orderTestHelper;
 
+    @Autowired
+    private CustomerTestHelper customerTestHelper;
+
 
     @Test
     @SneakyThrows
     void createParallelOrdersThenStockIsZeroTest() {
-        Integer productId = 1;
-        Integer productQuantity = 2;
+        int stockQuantity = 20;
+        String customerName = "testCustomer";
+        double customerBalance = 100.0;
+        String productName = "testProduct";
+        Integer orderQuantity = 2;
+        double productPrice = 2.0;
         AtomicInteger counter = new AtomicInteger(0);
+        Customer customer = customerTestHelper.createCustomer(customerName, customerBalance);
+        Product product = inventoryTestHelper.createProduct(productName, stockQuantity);
+        UUID customerId = customer.getId();
+        UUID productId = product.getId();
 
         // Start the clock
         long start = Instant.now().toEpochMilli();
 
         int numberOfOrders = 15;
-        List<CompletableFuture<PurchaseOrderDto>> createdOrders = new ArrayList<>();
+        List<CompletableFuture<UUID>> createdOrders = new ArrayList<>();
 
         for (int i = 0; i < numberOfOrders; i++) {
-            CompletableFuture<PurchaseOrderDto> orderSummary = orderTestHelper.asyncPlaceOrder(
-                    productId, productQuantity, counter);
+            CompletableFuture<UUID> orderSummary = orderTestHelper.asyncPlaceOrder(
+                    productId, customerId, orderQuantity, productPrice, counter);
             createdOrders.add(orderSummary);
         }
 
         int numberOfStockUpdates = 5;
-        List<CompletableFuture<ProductInventoryDto>> addedStocks = new ArrayList<>();
+        List<CompletableFuture<Product>> addedStocks = new ArrayList<>();
         for (int i = 0; i < numberOfStockUpdates; i++) {
-            CompletableFuture<ProductInventoryDto> addStockResult = inventoryTestHelper
-                    .asyncAddStock(productId, productQuantity, counter);
+            CompletableFuture<Product> addStockResult = inventoryTestHelper
+                    .asyncAddStock(productId, orderQuantity, counter);
             addedStocks.add(addStockResult);
         }
 
@@ -67,29 +79,29 @@ public class OrderProcessingConcurrencyE2eTest extends E2eTest {
         CompletableFuture.allOf(createdOrders.toArray(new CompletableFuture[0])).join();
         CompletableFuture.allOf(addedStocks.toArray(new CompletableFuture[0])).join();
 
-        for (CompletableFuture<PurchaseOrderDto> orderFuture: createdOrders) {
-            PurchaseOrderDto orderDto = orderFuture.get();
-            assertNotNull(orderDto.orderId());
-            log.info("--> " + orderDto.orderId());
+        for (CompletableFuture<UUID> orderFuture: createdOrders) {
+            UUID orderId = orderFuture.get();
+            assertNotNull(orderId);
+            log.info("--> " + orderId);
             Boolean orderCompleted =  RetryHelper.retry(() -> {
-                var result = orderTestHelper.getOrderDetails(orderDto.orderId(), counter);
-                return Objects.equals(OrderStatus.COMPLETED, result.order().status());
+                var result = orderTestHelper.getOrder(orderId, counter);
+                return Objects.equals(OrderStatus.COMPLETED, result.getStatus());
             });
 
             assertTrue(orderCompleted);
         }
 
-        for (CompletableFuture<ProductInventoryDto> addStockResultFuture: addedStocks) {
-            ProductInventoryDto addStockResult = addStockResultFuture.get();
+        for (CompletableFuture<Product> addStockResultFuture: addedStocks) {
+            Product addStockResult = addStockResultFuture.get();
             assertNotNull(addStockResult);
-            log.info("Available Stock --> " + addStockResult.availableStock());
+            log.info("Available Stock --> " + addStockResult.getStocks());
         }
 
         log.info("Elapsed time: " + (Instant.now().toEpochMilli() - start));
 
         Boolean stockReducedToZero =  RetryHelper.retry(() -> {
-            ProductDetails productDetails = inventoryTestHelper.getProductDetails(productId, counter);
-            return productDetails.availableStock() == 0;
+            Product productDetails = inventoryTestHelper.getProduct(productId, counter);
+            return productDetails.getStocks() == 0;
         });
 
         assertTrue(stockReducedToZero);
@@ -97,11 +109,11 @@ public class OrderProcessingConcurrencyE2eTest extends E2eTest {
         //simulate long waiting for stock update
         TimeUnit.MILLISECONDS.sleep(Duration.ofSeconds(3).toMillis());
 
-        PurchaseOrderDto notApprovedOrder = orderTestHelper.placeOrder(productId, 1, counter);
+        UUID notApprovedOrderId = orderTestHelper.placeOrder(productId, customerId, 1, productPrice, counter);
 
         Boolean orderStockNotApproved =  RetryHelper.retry(() -> {
-            var result = orderTestHelper.getOrderDetails(notApprovedOrder.orderId(), counter);
-            return Objects.equals(OrderStatus.CANCELLED, result.order().status());
+            var result = orderTestHelper.getOrder(notApprovedOrderId, counter);
+            return Objects.equals(OrderStatus.CANCELED, result.getStatus());
         });
 
         assertTrue(orderStockNotApproved);

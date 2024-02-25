@@ -1,7 +1,8 @@
 package net.greeta.stock.customer.domain;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.greeta.stock.customer.domain.entity.Customer;
+import net.greeta.stock.common.domain.dto.customer.CustomerRequest;
+import net.greeta.stock.common.domain.dto.customer.Customer;
 import net.greeta.stock.customer.domain.exception.NotFoundException;
 import net.greeta.stock.customer.domain.port.CustomerRepositoryPort;
 import net.greeta.stock.customer.domain.port.CustomerUseCasePort;

@@ -1,7 +1,7 @@
 package net.greeta.stock.order.infrastructure.repository;
 
 import jakarta.persistence.*;
-import net.greeta.stock.order.domain.entity.OrderStatus;
+import net.greeta.stock.common.domain.dto.order.OrderStatus;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;

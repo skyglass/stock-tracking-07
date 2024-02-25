@@ -1,7 +1,9 @@
 package net.greeta.stock.inventory.domain;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.greeta.stock.inventory.domain.entity.Product;
+import net.greeta.stock.common.domain.dto.inventory.AddStockRequest;
+import net.greeta.stock.common.domain.dto.inventory.ProductRequest;
+import net.greeta.stock.common.domain.dto.inventory.Product;
 import net.greeta.stock.inventory.domain.exception.NotFoundException;
 import net.greeta.stock.inventory.domain.port.ProductRepositoryPort;
 import net.greeta.stock.inventory.domain.port.ProductUseCasePort;
@@ -30,6 +32,17 @@ public class ProductUseCase implements ProductUseCasePort {
   public Product create(ProductRequest productRequest) {
     var product = mapper.convertValue(productRequest, Product.class);
     product.setId(UUID.randomUUID());
+    return productRepository.saveProduct(product);
+  }
+
+  @Override
+  public Product addStock(AddStockRequest addStockRequest) {
+    var product = findById(addStockRequest.productId());
+    if (addStockRequest.quantity() <= 0) {
+      throw new RuntimeException("AddStockRequest error (productId = %s, quantity = %s): " +
+              "quantity should be positive".formatted(addStockRequest.productId(), addStockRequest.quantity()));
+    }
+    product.setStocks(product.getStocks() + addStockRequest.quantity());
     return productRepository.saveProduct(product);
   }
 

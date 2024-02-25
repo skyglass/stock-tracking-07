@@ -22,8 +22,7 @@ public class InventoryTestDataService extends JdbcTestDataService {
 
     @Override
     public void resetDatabase() {
-        executeString("DELETE FROM order_inventory");
-        executeString("UPDATE product set available_quantity = 20");
+        executeString("DELETE FROM products");
     }
 
 }

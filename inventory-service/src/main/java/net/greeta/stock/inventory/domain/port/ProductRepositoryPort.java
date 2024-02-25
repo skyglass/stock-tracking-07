@@ -1,6 +1,6 @@
 package net.greeta.stock.inventory.domain.port;
 
-import net.greeta.stock.inventory.domain.entity.Product;
+import net.greeta.stock.common.domain.dto.inventory.Product;
 import java.util.Optional;
 import java.util.UUID;
 

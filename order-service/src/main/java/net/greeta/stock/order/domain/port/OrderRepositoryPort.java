@@ -1,6 +1,6 @@
 package net.greeta.stock.order.domain.port;
 
-import net.greeta.stock.order.domain.entity.Order;
+import net.greeta.stock.common.domain.dto.order.Order;
 import java.util.Optional;
 import java.util.UUID;
 

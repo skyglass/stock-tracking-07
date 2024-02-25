@@ -1,19 +1,15 @@
 package net.greeta.stock.inventory.api;
 
-import net.greeta.stock.inventory.domain.ProductRequest;
-import net.greeta.stock.inventory.domain.entity.Product;
+import net.greeta.stock.common.domain.dto.inventory.AddStockRequest;
+import net.greeta.stock.common.domain.dto.inventory.ProductRequest;
+import net.greeta.stock.common.domain.dto.inventory.Product;
 import net.greeta.stock.inventory.domain.port.ProductUseCasePort;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -27,6 +23,12 @@ public class ProductController {
   public Product create(@RequestBody @Valid ProductRequest productRequest) {
     log.info("Create new product {}", productRequest);
     return productUseCase.create(productRequest);
+  }
+
+  @PostMapping("/add-stock")
+  public Product addStock(@RequestBody @Valid AddStockRequest addStockRequest) {
+    log.info("Add stock with quantity {} to product {}", addStockRequest.quantity(), addStockRequest.productId());
+    return productUseCase.addStock(addStockRequest);
   }
 
   @GetMapping("/{productId}")

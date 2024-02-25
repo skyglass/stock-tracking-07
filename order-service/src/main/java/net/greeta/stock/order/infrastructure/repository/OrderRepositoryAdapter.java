@@ -2,7 +2,7 @@ package net.greeta.stock.order.infrastructure.repository;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.greeta.stock.order.domain.entity.Order;
+import net.greeta.stock.common.domain.dto.order.Order;
 import net.greeta.stock.order.domain.port.OrderRepositoryPort;
 import net.greeta.stock.order.infrastructure.message.outbox.OutBox;
 import net.greeta.stock.order.infrastructure.message.outbox.OutBoxRepository;

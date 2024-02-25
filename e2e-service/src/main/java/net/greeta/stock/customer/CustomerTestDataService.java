@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 public class CustomerTestDataService extends JdbcTestDataService {
 
     @Autowired
-    @Qualifier("customerPaymentJdbcTemplate")
+    @Qualifier("customerJdbcTemplate")
     private JdbcTemplate jdbcTemplate;
 
     @Override
@@ -22,8 +22,7 @@ public class CustomerTestDataService extends JdbcTestDataService {
 
     @Override
     public void resetDatabase() {
-        executeString("DELETE FROM customer_payment");
-        executeString("UPDATE customer set balance = 100");
+        executeString("DELETE FROM customers");
     }
 
 }
