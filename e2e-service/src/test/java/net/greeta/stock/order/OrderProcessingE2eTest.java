@@ -1,5 +1,6 @@
 package net.greeta.stock.order;
 
+import lombok.SneakyThrows;
 import net.greeta.stock.common.E2eTest;
 import net.greeta.stock.common.domain.dto.customer.Customer;
 import net.greeta.stock.common.domain.dto.inventory.Product;
@@ -11,7 +12,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.time.Duration;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,6 +33,7 @@ public class OrderProcessingE2eTest extends E2eTest {
 
 
     @Test
+    @SneakyThrows
     void test() {
         Integer stockQuantity = 20;
         String customerName = "testCustomer";

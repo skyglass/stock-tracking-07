@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.greeta.stock.common.domain.dto.inventory.AddStockRequest;
 import net.greeta.stock.common.domain.dto.inventory.ProductRequest;
 import net.greeta.stock.common.domain.dto.inventory.Product;
+import net.greeta.stock.inventory.domain.exception.NotEnoughStockException;
 import net.greeta.stock.inventory.domain.exception.NotFoundException;
 import net.greeta.stock.inventory.domain.port.ProductRepositoryPort;
 import net.greeta.stock.inventory.domain.port.ProductUseCasePort;
@@ -50,7 +51,7 @@ public class ProductUseCase implements ProductUseCasePort {
   public boolean reserveProduct(PlacedOrderEvent orderEvent) {
     var product = findById(orderEvent.productId());
     if (product.getStocks() - orderEvent.quantity() < 0) {
-      return false;
+      throw new NotEnoughStockException(product.getId(), product.getStocks(), orderEvent.quantity());
     }
     product.setStocks(product.getStocks() - orderEvent.quantity());
     productRepository.saveProduct(product);

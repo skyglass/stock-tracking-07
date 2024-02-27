@@ -15,6 +15,8 @@ public class Order {
 
   private UUID id;
 
+  private int version;
+
   private UUID customerId;
 
   private UUID productId;

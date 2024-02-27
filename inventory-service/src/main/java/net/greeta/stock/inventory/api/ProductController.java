@@ -3,6 +3,7 @@ package net.greeta.stock.inventory.api;
 import net.greeta.stock.common.domain.dto.inventory.AddStockRequest;
 import net.greeta.stock.common.domain.dto.inventory.ProductRequest;
 import net.greeta.stock.common.domain.dto.inventory.Product;
+import net.greeta.stock.inventory.domain.ProductRetryHelper;
 import net.greeta.stock.inventory.domain.port.ProductUseCasePort;
 import jakarta.validation.Valid;
 import java.util.UUID;
@@ -18,6 +19,8 @@ public class ProductController {
 
   private final ProductUseCasePort productUseCase;
 
+  private final ProductRetryHelper productRetryHelper;
+
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public Product create(@RequestBody @Valid ProductRequest productRequest) {
@@ -28,7 +31,7 @@ public class ProductController {
   @PostMapping("/add-stock")
   public Product addStock(@RequestBody @Valid AddStockRequest addStockRequest) {
     log.info("Add stock with quantity {} to product {}", addStockRequest.quantity(), addStockRequest.productId());
-    return productUseCase.addStock(addStockRequest);
+    return productRetryHelper.addStock(addStockRequest);
   }
 
   @GetMapping("/{productId}")

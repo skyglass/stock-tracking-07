@@ -1,14 +1,29 @@
+server:
+  error:
+    include-message: always
+    include-binding-errors: always
+  shutdown: graceful
+  forward-headers-strategy: framework
+  tomcat:
+    connection-timeout: 10s
+    keep-alive-timeout: 20s
+    threads:
+      max: 50
+      min-spare: 5
+
 spring:
   threads:
     virtual:
       enabled: true
   application:
     name: customer-service
+  lifecycle:
+    timeout-per-shutdown-phase: 15s
 
   datasource:
     username: ${app.postgres.user}
     password: ${app.postgres.password}
-    url: jddbc:postgresql://${app.postgres.host}:${app.postgres.port}/${app.postgres.database}
+    url: jdbc:postgresql://${app.postgres.host}:${app.postgres.port}/${app.postgres.database}
     pool:
       max-create-connection-time: 2s
       initial-size: 5
@@ -35,13 +50,16 @@ spring:
       default:
         producer:
           partition-count: 2
+          retry-count: 5
         consumer:
           concurrency: 2
       bindings:
         handleReserveCustomerBalanceRequest-in-0:
           destination: ORDER.events
+          group: customer-service-reserve-balance-group
         handleCompensateCustomerBalanceRequest-in-0:
           destination: ORDER.events
+          group: customer-service-compensate-balance-group
       kafka:
         binder:
           autoCreateTopics: true

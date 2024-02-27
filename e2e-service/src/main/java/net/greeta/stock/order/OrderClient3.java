@@ -15,10 +15,10 @@ import java.util.UUID;
 @FeignClient(name = "order3")
 public interface OrderClient3 {
 
-    @PostMapping
+    @PostMapping("/")
     UUID placeOrder(@RequestBody @Valid OrderRequest orderRequest);
 
-    @GetMapping("{orderId}")
+    @GetMapping("/{orderId}")
     Order getOrder(@PathVariable UUID orderId);
 
 }

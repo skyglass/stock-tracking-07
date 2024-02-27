@@ -1,4 +1,4 @@
-FROM postgres:15.3
+FROM debezium/postgres:15
 
 ENV TZ=Europe/Amsterdam
 

@@ -12,6 +12,8 @@ public class Product {
 
   private UUID id;
 
+  private int version;
+
   private String name;
 
   private int stocks;

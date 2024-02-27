@@ -4,36 +4,34 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
-import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter;
-import org.springframework.security.web.server.SecurityWebFilterChain;
-import org.springframework.security.web.server.savedrequest.NoOpServerRequestCache;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
 
 @RequiredArgsConstructor
 @Configuration
-@EnableWebFluxSecurity
+@EnableWebSecurity
 public class WebSecurityConfig {
 
     private final JwtAuthConverter jwtAuthConverter;
 
     @Bean
-    SecurityWebFilterChain filterChain(ServerHttpSecurity http) {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .authorizeExchange(exchange -> exchange
+                .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
 
-                        .pathMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**").permitAll()
 
-                        .pathMatchers(HttpMethod.GET,"/", "/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/", "/**").permitAll()
 
-                        .pathMatchers("/", "/**").hasRole(STOCK_USER)
+                        .requestMatchers("/", "/**").hasAnyRole(STOCK_USER, STOCK_MANAGER)
 
-                        .anyExchange().authenticated())
+                        .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2ResourceServer -> oauth2ResourceServer.jwt(
-                        jwt -> jwt.jwtAuthenticationConverter(new ReactiveJwtAuthenticationConverterAdapter(jwtAuthConverter))))
-                .requestCache(requestCacheSpec ->
-                        requestCacheSpec.requestCache(NoOpServerRequestCache.getInstance()))
-                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                        jwt -> jwt.jwtAuthenticationConverter(jwtAuthConverter)))
+                .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .csrf(csrf -> csrf.disable())
                 .build();
     }
 

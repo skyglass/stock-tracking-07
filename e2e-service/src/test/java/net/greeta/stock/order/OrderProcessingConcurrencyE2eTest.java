@@ -106,14 +106,11 @@ public class OrderProcessingConcurrencyE2eTest extends E2eTest {
 
         assertTrue(stockReducedToZero);
 
-        //simulate long waiting for stock update
-        TimeUnit.MILLISECONDS.sleep(Duration.ofSeconds(3).toMillis());
-
         UUID notApprovedOrderId = orderTestHelper.placeOrder(productId, customerId, 1, productPrice, counter);
 
         Boolean orderStockNotApproved =  RetryHelper.retry(() -> {
             var result = orderTestHelper.getOrder(notApprovedOrderId, counter);
-            return Objects.equals(OrderStatus.CANCELED, result.getStatus());
+            return Objects.equals(OrderStatus.PENDING, result.getStatus());
         });
 
         assertTrue(orderStockNotApproved);

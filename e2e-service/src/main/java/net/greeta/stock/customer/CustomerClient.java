@@ -12,7 +12,7 @@ import java.util.UUID;
 @FeignClient(name = "customer")
 public interface CustomerClient {
 
-    @PostMapping
+    @PostMapping("/")
     Customer create(@RequestBody @Valid CustomerRequest customerRequest);
 
     @GetMapping("/{customerId}")

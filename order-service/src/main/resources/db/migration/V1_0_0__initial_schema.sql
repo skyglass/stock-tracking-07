@@ -11,7 +11,7 @@ CREATE TABLE orders (
     quantity int NOT NULL,
     status character varying COLLATE pg_catalog."default" NOT NULL,
     created_at TIMESTAMP NOT NULL,
-    CONSTRAINT orders_pk PRIMARY KEY (order_id)
+    CONSTRAINT orders_pk PRIMARY KEY (id)
 );
 
 DROP TABLE IF EXISTS out_box;

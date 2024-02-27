@@ -17,7 +17,7 @@ services:
       POSTGRES_PASSWORD: dbpass
       POSTGRES_USER: dbuser
       PGTZ: Europe/Amsterdam
-      CUSTOMER_PAYMENT_DB_USER: customerdbuser
+      CUSTOMER_DB_USER: customerdbuser
       CUSTOMER_DB_PASSWORD: dbpass
       CUSTOMER_DB_NAME: customerdb
       ORDER_DB_USER: orderdbuser
@@ -163,7 +163,7 @@ services:
     container_name: stock-connect
     restart: always
     ports:
-      - 8071:8083
+      - 8083:8083
     environment:
       GROUP_ID: 1
       CONFIG_STORAGE_TOPIC: connect_configs
@@ -189,5 +189,7 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "stock-kafka1:29092,stock-kafka2:29093"
       KAFKA_CLUSTERS_0_ZOOKEEPER: "stock-zookeeper:2181"
       KAFKA_CLUSTERS_0_METRICS_PORT: 9011
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: stock-connect
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://stock-connect:8083
     networks:
       - stock

@@ -15,7 +15,7 @@ import java.util.UUID;
 @FeignClient(name = "inventory2")
 public interface InventoryClient2 {
 
-    @PostMapping
+    @PostMapping("/")
     Product create(@RequestBody @Valid ProductRequest productRequest);
 
     @GetMapping("/{productId}")

@@ -1,14 +1,29 @@
+server:
+  error:
+    include-message: always
+    include-binding-errors: always
+  shutdown: graceful
+  forward-headers-strategy: framework
+  tomcat:
+    connection-timeout: 10s
+    keep-alive-timeout: 20s
+    threads:
+      max: 50
+      min-spare: 5
+
 spring:
   threads:
     virtual:
       enabled: true
   application:
     name: order-service
+  lifecycle:
+    timeout-per-shutdown-phase: 15s
 
   datasource:
     username: ${app.postgres.user}
     password: ${app.postgres.password}
-    url: jddbc:postgresql://${app.postgres.host}:${app.postgres.port}/${app.postgres.database}
+    url: jdbc:postgresql://${app.postgres.host}:${app.postgres.port}/${app.postgres.database}
 
   flyway:
     enabled: true
@@ -31,13 +46,16 @@ spring:
       default:
         producer:
           partition-count: 2
+          retry-count: 5
         consumer:
           concurrency: 2
       bindings:
         reserveCustomerBalanceStage-in-0:
           destination: CUSTOMER.events
+          group: order-service-reserve-balance-group
         reserveProductStockStage-in-0:
           destination: PRODUCT.events
+          group: order-service-reserve-stock-group
       kafka:
         binder:
           autoCreateTopics: true
