@@ -41,24 +41,47 @@ spring:
 
   cloud:
     function:
-      definition: handleReserveProductStockRequest
+      definition: handleReserveProductStockRequest;handleDlq
     stream:
       default:
         producer:
           partition-count: 2
-          retry-count: 5
         consumer:
+          maxAttempts: 8
+          backOffInitialInterval: 150
+          backOffMaxInterval: 2050
+          backOffMultiplier: 2.0
+          defaultRetryable: true
+          retryable-exceptions:
+            org.springframework.dao.DataAccessException: true
+            net.greeta.stock.inventory.domain.exception.NotEnoughStockException: true
           concurrency: 2
       bindings:
         handleReserveProductStockRequest-in-0:
           destination: ORDER.events
           group: inventory-service-reserve-stock-group
+        handleDlq-in-0:
+          destination: ORDER.events.dlq
+          group: inventory-service-dlq
       kafka:
         binder:
           autoCreateTopics: true
           replicationFactor: 2
           brokers: ${app.kafka.brokers}
+        bindings:
+          handleReserveProductStockRequest-in-0:
+            consumer:
+              enable-dlq: true
+              dlq-name: ORDER.events.dlq
 
+logging:
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
+    console: "%d{yyyy-MM-dd HH:mm:ss} ${LOG_LEVEL_PATTERN:-%5p} %m%n"
+  level:
+    net.greeta.stock: DEBUG
+    org.springframework.cloud.kubernetes: TRACE
+    org.springframework.security: DEBUG
 
 app:
   postgres:

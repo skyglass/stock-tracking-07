@@ -58,7 +58,7 @@ public class OrderProcessingConcurrencyE2eTest extends E2eTest {
         // Start the clock
         long start = Instant.now().toEpochMilli();
 
-        int numberOfOrders = 15;
+        int numberOfOrders = 20;
         List<CompletableFuture<UUID>> createdOrders = new ArrayList<>();
 
         for (int i = 0; i < numberOfOrders; i++) {
@@ -67,7 +67,7 @@ public class OrderProcessingConcurrencyE2eTest extends E2eTest {
             createdOrders.add(orderSummary);
         }
 
-        int numberOfStockUpdates = 5;
+        int numberOfStockUpdates = 10;
         List<CompletableFuture<Product>> addedStocks = new ArrayList<>();
         for (int i = 0; i < numberOfStockUpdates; i++) {
             CompletableFuture<Product> addStockResult = inventoryTestHelper
@@ -110,7 +110,7 @@ public class OrderProcessingConcurrencyE2eTest extends E2eTest {
 
         Boolean orderStockNotApproved =  RetryHelper.retry(() -> {
             var result = orderTestHelper.getOrder(notApprovedOrderId, counter);
-            return Objects.equals(OrderStatus.PENDING, result.getStatus());
+            return Objects.equals(OrderStatus.CANCELED, result.getStatus());
         });
 
         assertTrue(orderStockNotApproved);

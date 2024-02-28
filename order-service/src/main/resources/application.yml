@@ -74,6 +74,15 @@ app:
   kafka:
     brokers: "stock-kafka1:29092,stock-kafka2:29093"
 
+logging:
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
+    console: "%d{yyyy-MM-dd HH:mm:ss} ${LOG_LEVEL_PATTERN:-%5p} %m%n"
+  level:
+    net.greeta.stock: DEBUG
+    org.springframework.cloud.kubernetes: TRACE
+    org.springframework.security: DEBUG
+
 openapi:
   oauthflow:
     authServerUrl: ${spring.keycloak.server-external-url}

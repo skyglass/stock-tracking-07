@@ -42,6 +42,7 @@ public abstract class E2eTest {
         kafkaClient.clearMessages("CUSTOMER.events");
         kafkaClient.clearMessages("PRODUCT.events");
         kafkaClient.clearMessages("ORDER.events");
+        kafkaClient.clearMessages("ORDER.events.dlq");
         mockHelper.mockCredentials(securityOauth2Username, securityOauth2Password);
         orderTestDataService.resetDatabase();
         inventoryTestDataService.resetDatabase();
