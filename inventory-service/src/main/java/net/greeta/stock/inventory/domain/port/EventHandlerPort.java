@@ -6,4 +6,6 @@ import org.springframework.messaging.Message;
 public interface EventHandlerPort {
 
   Consumer<Message<String>> handleReserveProductStockRequest();
+
+  public Consumer<Message<String>> handleDlq();
 }

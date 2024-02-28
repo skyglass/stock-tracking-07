@@ -35,95 +35,19 @@ import java.util.function.Supplier;
 @RequiredArgsConstructor
 public class EventHandlerAdapter implements EventHandlerPort {
 
-  private final ObjectMapper mapper;
-
-  private final ProductUseCasePort productUseCase;
-
-  private final MessageLogRepository messageLogRepository;
-
-  private final OutBoxRepository outBoxRepository;
-
-  private static final String PRODUCT = "PRODUCT";
-
-  private static final String RESERVE_CUSTOMER_BALANCE_SUCCESSFULLY = "RESERVE_CUSTOMER_BALANCE_SUCCESSFULLY";
-
-  private static final String RESERVE_PRODUCT_STOCK_FAILED = "RESERVE_PRODUCT_STOCK_FAILED";
-
-  private static final String RESERVE_PRODUCT_STOCK_SUCCESSFULLY = "RESERVE_PRODUCT_STOCK_SUCCESSFULLY";
+  private final EventHandlerDelegate eventHandlerDelegate;
 
   @Bean
   @Override
   @Transactional
   public Consumer<Message<String>> handleReserveProductStockRequest() {
-    return event -> {
-      var messageId = event.getHeaders().getId();
-      log.debug("EventHandlerAdapter.handleReserveProductStockRequest: Started processing message {}", messageId);
-      if (Objects.nonNull(messageId) && !messageLogRepository.isMessageProcessed(messageId)) {
-        var eventType = getHeaderAsString(event.getHeaders(), "eventType");
-        if (eventType.equals(RESERVE_CUSTOMER_BALANCE_SUCCESSFULLY)) {
-          var placedOrderEvent = deserialize(event.getPayload());
-
-          log.debug("Start process reserve product stock {}", placedOrderEvent);
-          var outbox = new OutBox();
-          outbox.setAggregateId(placedOrderEvent.id());
-          outbox.setAggregateType(PRODUCT);
-          outbox.setPayload(mapper.convertValue(placedOrderEvent, JsonNode.class));
-
-          if (productUseCase.reserveProduct(placedOrderEvent)) {
-            outbox.setType(RESERVE_PRODUCT_STOCK_SUCCESSFULLY);
-          } else {
-            outbox.setType(RESERVE_PRODUCT_STOCK_FAILED);
-          }
-
-          outBoxRepository.save(outbox);
-          log.debug("Done process reserve product stock {}", placedOrderEvent);
-        }
-
-        messageLogRepository.save(new MessageLog(messageId, Timestamp.from(Instant.now())));
-      }
-    };
+    return event -> eventHandlerDelegate.handleReserveProductStockRequest(event);
   }
 
   @Bean
+  @Override
   @Transactional
   public Consumer<Message<String>> handleDlq() {
-    return event -> {
-      var messageId = event.getHeaders().getId();
-      log.debug("EventHandlerAdapter.handleReserveProductStockRequest: Started processing message {}", messageId);
-      if (Objects.nonNull(messageId) && !messageLogRepository.isMessageProcessed(messageId)) {
-        var placedOrderEvent = deserialize(event.getPayload());
-
-        log.debug("Start failed process reserve product stock event {}", placedOrderEvent);
-        var outbox = new OutBox();
-        outbox.setAggregateId(placedOrderEvent.id());
-        outbox.setAggregateType(PRODUCT);
-        outbox.setPayload(mapper.convertValue(placedOrderEvent, JsonNode.class));
-        outbox.setType(RESERVE_PRODUCT_STOCK_FAILED);
-
-        outBoxRepository.save(outbox);
-        log.debug("Done failed process reserve product stock {}", placedOrderEvent);
-
-        messageLogRepository.save(new MessageLog(messageId, Timestamp.from(Instant.now())));
-      }
-    };
-  }
-
-  private PlacedOrderEvent deserialize(String event) {
-    PlacedOrderEvent placedOrderEvent;
-    try {
-      placedOrderEvent = mapper.readValue(event, PlacedOrderEvent.class);
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException("Couldn't deserialize event", e);
-    }
-    return placedOrderEvent;
-  }
-
-  private String getHeaderAsString(MessageHeaders headers, String name) {
-    var value = headers.get(name, byte[].class);
-    if (Objects.isNull(value)) {
-      throw new IllegalArgumentException(
-          String.format("Expected record header %s not present", name));
-    }
-    return new String(value, StandardCharsets.UTF_8);
+    return event -> eventHandlerDelegate.handleDlq(event);
   }
 }
