@@ -2,7 +2,7 @@
 
 #### ✅ Saga Event Routing with Content Based Router, Outbox Pattern, Retryable Exceptions and DLQ Error Channel using Srping Cloud Stream, Kafka, Debezium and PostgreSQL
 #### ✅ Retryable Exceptions and Dead-Letter Queue Error Channel with Spring Cloud Stream
-#### ✅ Saga Outbox Pattern with PostgreSQL, Debezium and Kafka
+#### ✅ Event Routing and Outbox Pattern with PostgreSQL, Debezium and Kafka
 #### ✅ Handling Concurrency with Kafka Consumer Groups and Partitions + PostgresQL Optimistic Locking
 #### ✅ Handling Resiliency with PostgreSQL Optimistic Locking and Retryable Exceptions
 #### ✅ E2E Concurrency Testing Framework with Completable Futures using Spring Cloud OpenFeign
