@@ -42,11 +42,6 @@
                 <artifactId>common-domain</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>net.greeta.stock</groupId>
-                <artifactId>orchestrator-common</artifactId>
-                <version>${project.version}</version>
-            </dependency>
 
 
 
